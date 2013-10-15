@@ -6,8 +6,8 @@ function [ theta ] = logisticRegressionTrain( DataTrain, LabelsTrain, maxIterati
 % 
 % Implement a Newton-Raphson algorithm.
 
-	testFunctions()
-	%theta = runAlgorithm(DataTrain, LabelsTrain, maxIterations)
+	%testFunctions()
+	theta = runAlgorithm(DataTrain, LabelsTrain, maxIterations)
 
 end
 
@@ -36,14 +36,14 @@ function testFunctions
 	resultOfG = g(0);
 	assert(resultOfG == 1/2);
 
-	testX = [0; 2; 0];
-	testTheta = [0; 1; 0];
+	testX = [0; 0];
+	testTheta = [1; 0];
 	%Test htheta
-	resultOfHTheta = htheta(testTheta, testX);
-	assert(resultOfHTheta == 2);
+	resultOfHTheta = htheta(testTheta, testX)
+	assert(resultOfHTheta == 1/2);
 
 	testTheta = [0; 0];
-	testDataSet = [0, 1; 0, 0; 1, 0; 1, 1];
+	testDataSet = [0, 1; 0, 0; 1, 0; 1, 1]
 	testDataSize = size(testDataSet,1);
 	testDataDimension = size(testDataSet, 2);
 	testLabelSet = [1; -1; 1; 1];
@@ -51,14 +51,14 @@ function testFunctions
 	convertedLabelSet = convert(testLabelSet);
 	assert(convertedLabelSet == [1; 0; 1; 1]);
 
+	%Test gradient
+	gradientVector = gradientLogL(testDataDimension, testDataSize, testTheta, testDataSet, convertedLabelSet);
+	assert(gradientVector == [1/4; 1/4]);
+
 	%Test hessian
 	hessian = hessianLogL(testDataDimension, testDataSize, testTheta, testDataSet, convertedLabelSet);
 	%Is this even a correct result?
 	assert(hessian == [1/2, 1/4; 1/4, 1/2]);
-
-	%Test gradient
-	gradientVector = gradientLogL(testDataDimension, testDataSize, testTheta, testDataSet, convertedLabelSet);
-	assert(gradientVector == [1/2; 1/2]);
 endfunction
 
 function DataTrain = convert(DataTrain) 
@@ -75,9 +75,9 @@ function result = hessianLogL(dimension, sampleSize, theta, DataTrain, LabelsTra
 
 	for i = 1:sampleSize
 		%Transpose because data is organised in rows
-		x = transpose(DataTrain(i, :))
+		x = transpose(DataTrain(i, :));
 	
-		result += htheta(theta, x) - (1-htheta(theta, x)) * x * transpose(x);
+		result += htheta(theta, x) * (1-htheta(theta, x)) * x * transpose(x);
 	end
 
 	result = -result/sampleSize;
@@ -92,7 +92,7 @@ endfunction
 
 function result = htheta(theta, x)
 
-	result = transpose(theta)*x;
+	result = g(transpose(theta)*x);
 
 endfunction
 
@@ -105,10 +105,12 @@ function result = gradientLogL(dimension, sampleSize, theta, DataTrain, LabelsTr
 	%all samples
 
 	for i = 1:sampleSize
+		%Getting label for current sample
 	  	y = LabelsTrain(i);
+		%Getting data for current sample
 		%Transpose because data is organised in rows
 		x = transpose(DataTrain(i, :));
-	
+
 		result += (y - htheta(theta, x))*x;
 	end
 
