@@ -6,7 +6,7 @@ function [ theta ] = logisticRegressionTrain( DataTrain, LabelsTrain, maxIterati
 % 
 % Implement a Newton-Raphson algorithm.
 
-	%testFunctions()
+	testFunctions()
 	theta = runAlgorithm(DataTrain, LabelsTrain, maxIterations)
 
 end
@@ -36,18 +36,20 @@ function testFunctions
 	resultOfG = g(0);
 	assert(resultOfG == 1/2);
 
+	%Test htheta
 	testX = [0; 0];
 	testTheta = [1; 0];
-	%Test htheta
-	resultOfHTheta = htheta(testTheta, testX)
+	resultOfHTheta = htheta(testTheta, testX);
 	assert(resultOfHTheta == 1/2);
 
+	%Declare variables for hessian and gradient test
 	testTheta = [0; 0];
 	testDataSet = [0, 1; 0, 0; 1, 0; 1, 1]
 	testDataSize = size(testDataSet,1);
 	testDataDimension = size(testDataSet, 2);
 	testLabelSet = [1; -1; 1; 1];
 
+	%Test data conversion
 	convertedLabelSet = convert(testLabelSet);
 	assert(convertedLabelSet == [1; 0; 1; 1]);
 
@@ -58,7 +60,7 @@ function testFunctions
 	%Test hessian
 	hessian = hessianLogL(testDataDimension, testDataSize, testTheta, testDataSet, convertedLabelSet);
 	%Is this even a correct result?
-	assert(hessian == [1/2, 1/4; 1/4, 1/2]);
+	assert(hessian == [-0.125, -0.0625; -0.0625, -0.125]);
 endfunction
 
 function DataTrain = convert(DataTrain) 
