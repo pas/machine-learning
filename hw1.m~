@@ -22,7 +22,10 @@ N = size(Data,1);
 
 faceIdx = Labels > 0;
 nonFaceIdx = Labels < 0;
-figure;
+
+f0 = figure;
+set(f0, "visible", "off");
+
 n = 6; % number of examples in a row
 % faces (first row)
 FaceData = Data(faceIdx,:);
@@ -44,6 +47,8 @@ for k = 1:n
         title( 'Non faces' );
     end
 end
+
+print(f0, "examples.png", "-dpng");
 
 %%
 % First we select the train and test data randomly. We select aproximately
@@ -67,7 +72,7 @@ LabelsTest = Labels(1,testIdx);
 % Training with Logistic Regression.
 fprintf('Training ... ');
 tic;
-theta = logisticRegressionTrain( DataTrainI, LabelsTrain , 5);
+theta = logisticRegressionTrainZAUGGPASCAL( DataTrainI, LabelsTrain , 5);
 % theta = logisticRegressionTrain_SOLUTION( DataTrainI, LabelsTrain , 5);
 toc;
 
@@ -75,6 +80,16 @@ toc;
 % Test logistic regression
 scores = 1 ./ (1 + exp(-DataITestI*theta)');
 classifierOutput = (scores >= 0.5) - (scores < 0.5);
+
+%%
+% Test logistic regression on train data
+scoresTrain = 1 ./ (1 + exp(-DataTrainI*theta)');
+classifierTrainOutput = (scoresTrain >= 0.5) - (scoresTrain < 0.5);
+
+%%
+% Overall accuracy for trained data
+goodTrain = classifierTrainOutput == LabelsTrain;
+fprintf( 'accuracy for trained data %f%% (%d/%d)\n', 100*sum(goodTrain)/size(goodTrain,2), sum(goodTrain), size(goodTrain,2) );
 
 %%
 % Evaluation.
@@ -95,26 +110,34 @@ fprintf( 'accuracy: %f%% (%d/%d)\n', 100*sum(good)/size(good,2), sum(good), size
 % precison - recall curve
 precision = cumsum( positives ) ./ (1:Ntest);
 recall = cumsum( positives ) / sum( positives );
-figure;
+f1 = figure;
+set(f1, "visible", "off");
 plot(recall,precision);
 axis( [0 1 0 1] );
 title('precision-recall curve');
 xlabel('Recall');
 ylabel('Precision');
 
+print(f1, "precision.png", "-dpng");
+
 % ROC curve
 truePosRate = cumsum( positives ) / sum( positives ); % same as recall
 falseNegRate = cumsum( ~positives ) / sum( ~positives );
-figure;
+f2 = figure;
+set(f2, "visible", "off");
+
 plot(falseNegRate,truePosRate);
 axis( [0 1 0 1] );
 title('ROC curve');
 xlabel('False Negative Rate');
 ylabel('True Positive Rate');
 
+print(f2, "rocCurve.png", "-dpng");
 
 % plot some classifications
-figure;
+f3 = figure;
+set(f3, "visible", "off");
+
 n = 10; % number of examples in a row
 m = 3; % number of examples in a column
 DataTest = Data(testIdx,:);
@@ -157,6 +180,8 @@ for k = 1:min(3*n,sum(classifierOutput<0))
     if k==1
         title( 'Classified as non-face' );
     end
+
+print(f3, "classification.png", "-dpng");
 end
 
 
