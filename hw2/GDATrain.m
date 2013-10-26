@@ -1,84 +1,63 @@
 function [phi, mu0, mu1, Sigma] = GDATrain( DataTrain, LabelsTrain )
 
-LabelsTrain = convert(LabelsTrain);
-dim = size(DataTrain,2);
+  %convert labels from -1 to 0
+  LabelsTrain(LabelsTrain == -1) = 0;
 
-testFunctions();
-
-phi = calculatePhi(LabelsTrain);
-mu0 = calculateMu0(DataTrain, LabelsTrain, dim);
-mu1 = calculateMu1(DataTrain, LabelsTrain, dim);
-Sigma = calculateSigma(DataTrain, LabelsTrain, dim, mu0, mu1);
-
-end
-
-function DataTrain = convert(DataTrain) 
-	DataTrain(DataTrain == -1) = 0;
-endfunction
-
-function phi = calculatePhi( LabelsTrain )
+  %getting dimension and m
+  dim = size(DataTrain,2);
   m = size(LabelsTrain, 2);
 
-  %sum all entries in LabelsTrain with one
-  result = sum(LabelsTrain(:)==1);
-  phi = result/m;
-endfunction
+  %create index vector for 1
+  onesIndexVector = LabelsTrain(:)==1;
+  %create index vector for 0
+  zerosIndexVector = LabelsTrain(:)==0;
 
-function mu0 = calculateMu0(DataTrain, LabelsTrain, dimension)
   %count labels with 0
-  sumOfZeros = sum(LabelsTrain(:)==0, 1);
+  sumOfZeros = sum(zerosIndexVector, 1);
+  %count labels with 1
+  sumOfOnes = sum(onesIndexVector, 1);
+
+  %create matrix only holding data for 1
+  positive = DataTrain(onesIndexVector, :);
+  %create matrix only holding data for 0
+  negative = DataTrain(zerosIndexVector, :);
+
+  %
+  % --- calculate phi ---
+  %
+
+  result = sum(onesIndexVector);
+  phi = result/m;
+
+  %
+  % --- calculate mu0 ---
+  % 
+
   %sum all rows which correspond to the label 0
-  result = sum(DataTrain(LabelsTrain==0, :), 1);
+  result = sum(negative, 1);
   %divide result by the count of labels
   mu0 = transpose(result / sumOfZeros);
-endfunction
 
-function mu1 = calculateMu1(DataTrain, LabelsTrain, dimension)
-  %count labels with 1
-  sumOfOnes = sum(LabelsTrain(:)==1);
+  %
+  % --- calculate mu1 ----
+  %
+
   %sum all rows which correspond to the label 1
-  result = sum(DataTrain(find(LabelsTrain), :), 1);
+  result = sum(positive, 1);
   %divide result by the count of labels
   mu1 = transpose(result / sumOfOnes);
-endfunction
+  
+  %
+  % --- calculate sigma ---
+  %
 
-function sigma = calculateSigma(DataTrain, LabelsTrain, dimension, mu0, mu1)
-  m = size(LabelsTrain, 2);
-
-  positive = DataTrain(LabelsTrain==1, :);
-  positiveSize = size(positive, 1);
-  negative = DataTrain(LabelsTrain==0, :);
-  negativeSize = size(negative, 1);
-
-  mu0Matrix = repmat(mu0', negativeSize, 1);
+  %subtract mu0 from each row
   negative = bsxfun(@minus, negative, mu0');
 
-  mu1Matrix = repmat(mu1', positiveSize, 1);
+  %subtract mu1 from each row
   positive = bsxfun(@minus, positive, mu1');
 
-  sigma = ((positive' * positive)+(negative' * negative))/m;
-endfunction
-
-function testFunctions()
-  testData = [0, 17; 1, 7; 4, 3; 1, 2]; 
-  testLabels = [0, 0, 1, 1];
-  sum(testData(testLabels==0, :))
-
-  % testing calculation of phi
-  testLabels = [0, 1, 1, 1];
-  phi = calculatePhi(testLabels);
-  assert(phi == 0.75);
-
-  % testing calculation of mu0
-  mu0 = calculateMu0(testData, testLabels, 2);
-  assert(mu0 == [0; 17]);
-
-  % testing calculation of mu1
-  mu1 = calculateMu1(testData, testLabels, 2);
-  assert(mu1 == [2; 4]);
-
-  % testing calculation of sigma
-  sigma = calculateSigma(testData, testLabels, 2, mu0, mu1);
-  assert(sigma == [1.5, -0.75; -0.75, 3.5]);
-endfunction
-
+  %part of sigma is sum x(i)-mu * x(i)'-mu which is exaclty the same as A'*A when
+  %mu is already subtracted. 
+  Sigma = ((positive' * positive)+(negative' * negative))/m;
+end
