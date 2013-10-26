@@ -25,81 +25,60 @@ function phi = calculatePhi( LabelsTrain )
 endfunction
 
 function mu0 = calculateMu0(DataTrain, LabelsTrain, dimension)
-  m = size(LabelsTrain, 2);
-
-  %sum all entries in LabelsTrain with zero
-  sumOfZeros = sum(LabelsTrain(:)==0);
-  
-  result = zeros(dimension, 1);
-
-  for index = 1:m 
-    x = transpose(DataTrain(index, :));
-    y = LabelsTrain(index);
-    
-    if(y == 0) 
-      result = result + x;
-    end
-  end
-
-  mu0 = result / sumOfZeros;
+  %count labels with 0
+  sumOfZeros = sum(LabelsTrain(:)==0, 1);
+  %sum all rows which correspond to the label 0
+  result = sum(DataTrain(LabelsTrain==0, :), 1);
+  %divide result by the count of labels
+  mu0 = transpose(result / sumOfZeros);
 endfunction
 
 function mu1 = calculateMu1(DataTrain, LabelsTrain, dimension)
-  m = size(LabelsTrain, 2);
-
+  %count labels with 1
   sumOfOnes = sum(LabelsTrain(:)==1);
-
-  result = zeros(dimension, 1);
-  control = 0;
-
-  for index = 1:m 
-    x = transpose(DataTrain(index, :));
-    y = LabelsTrain(index);
-
-    if(y == 1)
-       result = result + x;
-    endif
-  endfor
-
-   mu1 = result / sumOfOnes;
+  %sum all rows which correspond to the label 1
+  result = sum(DataTrain(find(LabelsTrain), :), 1);
+  %divide result by the count of labels
+  mu1 = transpose(result / sumOfOnes);
 endfunction
 
 function sigma = calculateSigma(DataTrain, LabelsTrain, dimension, mu0, mu1)
   m = size(LabelsTrain, 2);
-  sigma = zeros(dimension);
 
-  for index = 1:m
-    x = transpose(DataTrain(index, :));
-    y = LabelsTrain(index);
+  positive = DataTrain(LabelsTrain==1, :);
+  positiveSize = size(positive, 1);
+  negative = DataTrain(LabelsTrain==0, :);
+  negativeSize = size(negative, 1);
 
-    mu = mu1;
-    if(y == 0)
-      mu = mu0;
-    end
+  mu0Matrix = repmat(mu0', negativeSize, 1);
+  negative = bsxfun(@minus, negative, mu0');
 
-    sigma = sigma + ((x - mu)*transpose(x - mu));        
-  end
+  mu1Matrix = repmat(mu1', positiveSize, 1);
+  positive = bsxfun(@minus, positive, mu1');
 
-  sigma = sigma/m;
+  sigma = ((positive' * positive)+(negative' * negative))/m;
 endfunction
 
 function testFunctions()
+  testData = [0, 17; 1, 7; 4, 3; 1, 2]; 
+  testLabels = [0, 0, 1, 1];
+  sum(testData(testLabels==0, :))
+
   % testing calculation of phi
   testLabels = [0, 1, 1, 1];
   phi = calculatePhi(testLabels);
   assert(phi == 0.75);
 
   % testing calculation of mu0
-  testData = [0, 1; 1, 7; 4, 3; 1, 2]; 
-  mu0 = calculateMu0(testData, testLabels, 2)
-  assert(mu0 == [0; 1]);
+  mu0 = calculateMu0(testData, testLabels, 2);
+  assert(mu0 == [0; 17]);
 
   % testing calculation of mu1
-  mu1 = calculateMu1(testData, testLabels, 2)
+  mu1 = calculateMu1(testData, testLabels, 2);
   assert(mu1 == [2; 4]);
 
   % testing calculation of sigma
-  sigma = calculateSigma(testData, testLabels, 2, mu0, mu1)
-  %assert(sigma == [0.25, 0; 0, 0]);
+  sigma = calculateSigma(testData, testLabels, 2, mu0, mu1);
+  assert(sigma == [1.5, -0.75; -0.75, 3.5]);
 endfunction
 
