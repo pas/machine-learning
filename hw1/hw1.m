@@ -13,7 +13,7 @@ clc;
 % Labels(1,k) = 1, it means the kth sample is a face, if it is -1, than the
 % sample is not a face. All the labels are either 1 or -1.
 
-load('faces.mat');
+load('../faces.mat');
 N = size(Data,1);
 
 %%
@@ -180,9 +180,8 @@ for k = 1:min(3*n,sum(classifierOutput<0))
     if k==1
         title( 'Classified as non-face' );
     end
-
-print(f3, "classification.png", "-dpng");
 end
+print(f3, "classification.png", "-dpng");
 
 
 

@@ -13,7 +13,7 @@ clc;
 % Labels(1,k) = 1, it means the kth sample is a face, if it is -1, than the
 % sample is not a face. All the labels are either 1 or -1.
 
-load('faces.mat');
+load('../faces.mat');
 N = size(Data,1);
 
 %%
@@ -22,7 +22,10 @@ N = size(Data,1);
 
 faceIdx = Labels > 0;
 nonFaceIdx = Labels < 0;
-figure;
+
+f0 = figure;
+set(f0, "visible", "off");
+
 n = 6; % number of examples in a row
 % faces (first row)
 FaceData = Data(faceIdx,:);
@@ -44,6 +47,8 @@ for k = 1:n
         title( 'Non faces' );
     end
 end
+
+print(f0, "examples.png", "-dpng");
 
 %%
 % First we select the train and test data randomly. We select aproximately
@@ -99,26 +104,31 @@ fprintf( 'accuracy: %f%% (%d/%d)\n', 100*sum(good)/size(good,2), sum(good), size
 % precison - recall curve
 precision = cumsum( positives ) ./ (1:Ntest);
 recall = cumsum( positives ) / sum( positives );
-figure;
+f1 = figure;
+set(f1, "visible", "off");
 plot(recall,precision);
 axis( [0 1 0 1] );
 title('precision-recall curve');
 xlabel('Recall');
 ylabel('Precision');
+print(f1, "precision.png", "-dpng");
 
 % ROC curve
 truePosRate = cumsum( positives ) / sum( positives ); % same as recall
 falseNegRate = cumsum( ~positives ) / sum( ~positives );
-figure;
+f2 = figure;
+set(f2, "visible", "off");
 plot(falseNegRate,truePosRate);
 axis( [0 1 0 1] );
 title('ROC curve');
 xlabel('False Negative Rate');
 ylabel('True Positive Rate');
+print(f2, "rocCurve.png", "-dpng");
 
 
 % plot some classifications
-figure;
+f3 = figure;
+set(f3, "visible", "off");
 n = 10; % number of examples in a row
 m = 3; % number of examples in a column
 DataTest = Data(testIdx,:);
@@ -162,6 +172,7 @@ for k = 1:min(3*n,sum(classifierOutput<0))
         title( 'Classified as non-face' );
     end
 end
+print(f3, "classification.png", "-dpng");
 
 
 
