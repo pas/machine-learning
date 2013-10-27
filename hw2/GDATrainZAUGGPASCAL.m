@@ -1,4 +1,4 @@
-function [phi, mu0, mu1, Sigma] = GDATrain( DataTrain, LabelsTrain )
+function [phi, mu0, mu1, Sigma] = GDATrainZAUGGPASCAL( DataTrain, LabelsTrain )
 
   %convert labels from -1 to 0
   LabelsTrain(LabelsTrain == -1) = 0;
@@ -15,7 +15,7 @@ function [phi, mu0, mu1, Sigma] = GDATrain( DataTrain, LabelsTrain )
   %count labels with 0
   sumOfZeros = sum(zerosIndexVector, 1);
   %count labels with 1
-  sumOfOnes = sum(onesIndexVector, 1);
+  sumOfOnes = m - sumOfZeros;
 
   %create matrix only holding data for 1
   positive = DataTrain(onesIndexVector, :);
