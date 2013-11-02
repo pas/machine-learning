@@ -64,16 +64,26 @@ LabelsTest = Labels(1,testIdx);
 % Training 
 fprintf('Training ... ');
 VLFEAT_FOLDER = '../vlfeat'; %Put here the path to the root floder of VlFeat
-run([VLFEAT_FOLDER  '/toolbox/vl_setup.m']);
+addpath ([VLFEAT_FOLDER, '/toolbox']);
+vl_setup;
 
 tic;
-% Put here the SVM training code here
+
+DataTrain = DataTrain';
+LabelsTrain = LabelsTrain';
+
+lambda = 0.75; % Regularization parameter
+maxIter = 100000; % Maximum number of iterations
+
+[w b info] = vl_svmtrain(DataTrain, LabelsTrain, lambda, 'MaxNumIterations', maxIter);
+
 toc;
+
 %keyboard
 %%
 % Test Svm.
 % compute the test scores of the SVM
-scores = 10;% complete the code
+scores = w' * DataTest' + b;
 
 classifierOutput = (scores >= 0.0) - (scores < 0.0);
 

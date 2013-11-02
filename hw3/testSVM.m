@@ -10,8 +10,8 @@ VLFEAT_FOLDER = '../vlfeat'; %Put here the path to the root floder of VlFeat
 addpath ([VLFEAT_FOLDER, '/toolbox']);
 vl_setup;
 
-X = [1, 2; 2, 1; 5, 7; 7, 5];
-y = [1; 1; -1; -1;];
+X = [1, 2; 2, 1; 5, 7; 7, 5; 3, 3; 4, 4; 1, 1]
+y = [1; 1; -1; -1; -1; -1; -1];
 
 X = X';
 y = y';
@@ -27,10 +27,16 @@ hold on
 plot(Xp(1,:),Xp(2,:),'*b')
 axis equal ;
 
-lambda = 0.01 ; % Regularization parameter
+lambda = 0.02 ; % Regularization parameter
 maxIter = 1000 ; % Maximum number of iterations
 
 [w b info] = vl_svmtrain(X, y, lambda, 'MaxNumIterations', maxIter);
+
+result = w' * X + b;
+result(result > 0) = 1;
+result(result <= 0) = -1;
+positive = sum(result == 1)
+negative = sum(result == -1)
 
 % Visualisation
 eq = [num2str(w(1)) '*x+' num2str(w(2)) '*y+' num2str(b)];
