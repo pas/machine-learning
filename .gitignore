@@ -3,3 +3,4 @@ octave-core
 *Fremd.*
 vlfeat
 *.tar.gz
+.DS_Store
