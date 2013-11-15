@@ -60,7 +60,7 @@ LabelsTrain = Labels(1,trainIdx);
 DataTest = Data(testIdx,:);
 LabelsTest = Labels(1,testIdx);
 
-%%
+%%O
 % Training 
 fprintf('Training ... ');
 VLFEAT_FOLDER = '../vlfeat'; %Put here the path to the root floder of VlFeat
@@ -72,8 +72,8 @@ tic;
 DataTrain = DataTrain';
 LabelsTrain = LabelsTrain';
 
-lambda = 0.75; % Regularization parameter
-maxIter = 100000; % Maximum number of iterations
+lambda = 0.001; % Regularization parameter
+maxIter = 1000000; % Maximum number of iterations
 
 [w b info] = vl_svmtrain(DataTrain, LabelsTrain, lambda, 'MaxNumIterations', maxIter);
 
