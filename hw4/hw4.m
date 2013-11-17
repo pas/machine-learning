@@ -7,7 +7,6 @@ load('data1.mat');
 %load('data2.mat')
 
 K = max(labels); % number of clusters
-K = 4;
 
 %% display data
 fx = figure;
@@ -36,12 +35,10 @@ Cinit = X(:,perm(1:K));
 %Cinit = [0, 0; 1, 1; 2, 2]';
 %Cinit = [0, 0; 8, 2; 10, 5]';
 
-fprintf('k-means ... ');
+fprintf('k-means ... \n');
 tic;
 [C, A] = Kmeans_PASCALZAUGG(X, Cinit);
 toc;
-
-C
 
 %% display clustering
 f1 = figure;

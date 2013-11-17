@@ -5,6 +5,7 @@ testMe();
 k = getK(Cinit');
 ids = zeros(size(X, 2), 1);
 [C, ids] = recursive(Cinit', X', ids, k);
+fprintf('Overall distance %d\n', distortionFunction(X', ids, C, k));
 
 A = ids';
 C = C';
@@ -26,10 +27,43 @@ function testMe()
 	actualK = getK(X);
 	expectedK = 3;
 	assert(actualK == expectedK);
+
+	A = [1, 1];
+	B = [2, 2; 3, 3];
+
+	difference = bsxfun(@minus, B, A);
+	squares = difference .^ 2;
+	result = sum(squares, 2);
+	assert(result == [2;8]);
+
+	X = [2, 2; 3, 3; 4, 4; 5, 5];
+	C = [1, 1; 6, 6];
+	ids = [1; 1; 1; 2];
+	k = 2;
+	actualDistance = distortionFunction(X, ids, C, k);
+	expectedDistance = 2 + 8 + 18 + 2;
+	assert(actualDistance == expectedDistance);
 endfunction
 
 function k = getK(X)
 	k = size(X, 1);
+endfunction
+
+%ids maps points in X to points in C
+function distance = distortionFunction(X, ids, C, k)
+	distance = 0;
+	for i = 1:k
+		%points belonging to ci 
+		pointsMappedToCi = X(ids==i, :);
+		%ci
+		ci = C(i, :);
+
+		%calculating sum of ||(x - ci)||^2
+		difference = bsxfun(@minus, pointsMappedToCi, ci);
+		squares = difference .^ 2;
+		result = sum(squares, 2);
+		distance += sum(result);
+	endfor
 endfunction
 
 function [C, ids] = recursive(X, Xi, oldIds, k)
