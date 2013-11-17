@@ -4,9 +4,10 @@ testMe();
 
 k = getK(Cinit');
 ids = zeros(size(X, 2), 1);
-[C, ids] = recursive(Cinit', X', ids, k)
+[C, ids] = recursive(Cinit', X', ids, k);
 
 A = ids';
+C = C';
 
 end
 
